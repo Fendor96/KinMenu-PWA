@@ -1,0 +1,114 @@
+:root{
+    --primary-color: #ff8c00;
+    --secondary-color: #00930c;
+    --tertiary-color: #df7301;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    background-color: #eee;
+}
+
+header{
+    margin-top:10px;
+    width:100vw;
+    display: flex;
+    overflow: hidden;
+    padding-top: 10px;
+    border-radius: 20px;
+    /*max-width: 100%;*/
+    height: 8vh;
+    position: fixed;
+    background-color: var(--primary-color);
+    z-index: 2;
+    align-items: center;
+    align-items: center;
+    text-align: center;
+}
+
+header span{
+    font-family: 'Pacifico', sans-serif;
+    color:  white;
+    font-size: 1.4rem;
+    margin: 0 10px;
+    cursor: pointer;
+}
+
+header a{
+    color: white;
+    font-size: 1.4rem;
+
+}
+
+
+#maps{
+    background-color: #eee;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+
+#input-div{
+    position: absolute;
+    z-index: 999;
+    width: 100%;
+    min-width: 90%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    top: 80%;
+}
+
+#btn-div{
+    position: absolute;
+    z-index: 999;
+    width: 100%;
+    min-width: 90%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 90%;
+
+}
+
+#input-div input{
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.689);
+    color: black;
+    padding: 12px;
+    width: 80%;
+    margin: 0 auto;
+    border: none;
+    box-shadow: 2px 2px 1px 1px rgba(0, 0, 0, 0.241);
+}
+
+#input-div button{
+    width: 12%;
+    height: 100%;
+    padding: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    box-shadow: 2px 2px 1px 1px rgba(0, 0, 0, 0.241);
+}
+#btn-div{
+    display: flex;
+    justify-content: space-around;
+    gap: -10px;
+}
+.quickBtn{
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 2px 2px 1px 1px rgba(0, 0, 0, 0.241);
+
+}
+
+

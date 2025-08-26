@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kin Menu - Étudiant</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'kin-orange': '#f97316',
+                        'kin-green': '#16a34a',
+                        'kin-green-light': '#dcfce7',
+                        'kin-orange-light': '#fed7aa',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        /* Styles personnalisés */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #fff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .menu-category {
+            scroll-margin-top: 80px;
+        }
+        
+        .menu-item-card {
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Animation d'apparition */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        /* Styles pour le panier */
+        .cart-panel {
+            transition: transform 0.3s ease-out;
+        }
+        
+        .cart-panel.hidden {
+            transform: translateY(calc(100% - 60px));
+        }
+        
+        /* Styles pour le scan QR */
+        .scanner-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border: 2px solid #16a34a;
+            border-radius: 10px;
+            box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Badge de notification */
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #f97316;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        /* Indicateur de catégorie active */
+        .category-indicator {
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Écran de démarrage -->
+    <div id="splash-screen" class="fixed inset-0 bg-kin-orange flex flex-col items-center justify-center z-50">
+        <h1 class="text-white text-4xl md:text-5xl font-bold mb-6">Kin Menu</h1>
+        <div class="loader"></div>
+    </div>
+
+    <!-- Page d'accueil (cachée au début) -->
+    <div id="app" class="hidden">
+        <!-- Bandeau vert avec titre -->
+        <header class="bg-kin-green text-white p-4 shadow-md sticky top-0 z-30">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl font-bold">Kin Menu</h1>
+                <div class="flex items-center space-x-4">
+                    <button id="cart-button" class="relative">
+                        <i data-lucide="shopping-cart" width="24" height="24"></i>
+                        <span id="cart-count" class="cart-badge hidden">0</span>
+                    </button>
+                    <button id="profile-button">
+                        <i data-lucide="user" width="24" height="24"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Contenu principal -->
+        <main class="pb-24">
+            <!-- Bannière promotionnelle -->
+            <div class="bg-kin-orange-light p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="font-bold text-lg">Menu du jour</h2>
+                        <p class="text-sm">Découvrez nos spécialités</p>
+                    </div>
+                    <button class="bg-kin-green text-white px-4 py-2 rounded-full text-sm">
+                        Voir plus
+                    </button>
+                </div>
+            </div>
+
+            <!-- Catégories de menu (navigation horizontale) -->
+            <div class="bg-white sticky top-[68px] z-20 overflow-x-auto">
+                <div class="flex px-4 py-3 space-x-4 relative">
+                    <div id="category-indicator" class="category-indicator absolute bottom-2 h-1 bg-kin-green rounded-full transition-all duration-300"></div>
+                    <button class="category-btn whitespace-nowrap px-3 py-1 text-sm font-medium" data-category="all">
+                        Tous
+                    </button>
+                    <button class="category-btn whitespace-nowrap px-3 py-1 text-sm font-medium" data-category="plats">
+                        Plats principaux
+                    </button>
+                    <button class="category-btn whitespace-nowrap px-3 py-1 text-sm font-medium" data-category="entrees">
+                        Entrées
+                    </button>
+                    <button class="category-btn whitespace-nowrap px-3 py-1 text-sm font-medium" data-category="desserts">
+                        Desserts
+                    </button>
+                    <button class="category-btn whitespace-nowrap px-3 py-1 text-sm font-medium" data-category="boissons">
+                        Boissons
+                    </button>
+                </div>
+            </div>
+
+            <!-- Liste des plats -->
+            <div class="p-4">
+                <h2 class="font-bold text-xl mb-4">Plats populaires</h2>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- Exemple d'élément de menu -->
+                    <div class="menu-item-card bg-white rounded-lg shadow overflow-hidden" data-category="plats" data-id="1">
+                        <div class="flex">
+                            <div class="w-24 h-24 bg-gray-200 flex-shrink-0">
+                                <!-- Image du plat -->
+                            </div>
+                            <div class="p-3 flex-1">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold">Poulet Braisé</h3>
+                                        <p class="text-sm text-gray-600">Poulet mariné et grillé, servi avec plantain et légumes</p>
+                                    </div>
+                                    <span class="font-bold text-kin-green">12,99 $</span>
+                                </div>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-xs text-gray-500">⭐ 4.5 (128 avis)</span>
+                                    <button class="add-to-cart bg-kin-green text-white px-3 py-1 rounded-full text-sm">
+                                        Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item-card bg-white rounded-lg shadow overflow-hidden" data-category="plats" data-id="2">
+                        <div class="flex">
+                            <div class="w-24 h-24 bg-gray-200 flex-shrink-0">
+                                <!-- Image du plat -->
+                            </div>
+                            <div class="p-3 flex-1">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold">Saka Saka</h3>
+                                        <p class="text-sm text-gray-600">Feuilles de manioc avec poisson et banane plantain</p>
+                                    </div>
+                                    <span class="font-bold text-kin-green">10,99 $</span>
+                                </div>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-xs text-gray-500">⭐ 4.7 (98 avis)</span>
+                                    <button class="add-to-cart bg-kin-green text-white px-3 py-1 rounded-full text-sm">
+                                        Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item-card bg-white rounded-lg shadow overflow-hidden" data-category="entrees" data-id="3">
+                        <div class="flex">
+                            <div class="w-24 h-24 bg-gray-200 flex-shrink-0">
+                                <!-- Image du plat -->
+                            </div>
+                            <div class="p-3 flex-1">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold">Beignets</h3>
+                                        <p class="text-sm text-gray-600">Beignets d'acra de morue, sauce piquante</p>
+                                    </div>
+                                    <span class="font-bold text-kin-green">5,99 $</span>
+                                </div>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-xs text-gray-500">⭐ 4.3 (76 avis)</span>
+                                    <button class="add-to-cart bg-kin-green text-white px-3 py-1 rounded-full text-sm">
+                                        Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item-card bg-white rounded-lg shadow overflow-hidden" data-category="desserts" data-id="4">
+                        <div class="flex">
+                            <div class="w-24 h-24 bg-gray-200 flex-shrink-0">
+                                <!-- Image du plat -->
+                            </div>
+                            <div class="p-3 flex-1">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold">Mango Delight</h3>
+                                        <p class="text-sm text-gray-600">Mango fraîche avec glace vanille et coulis de fruit de la passion</p>
+                                    </div>
+                                    <span class="font-bold text-kin-green">6,99 $</span>
+                                </div>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-xs text-gray-500">⭐ 4.8 (54 avis)</span>
+                                    <button class="add-to-cart bg-kin-green text-white px-3 py-1 rounded-full text-sm">
+                                        Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Panier flottant -->
+        <div id="cart-panel" class="cart-panel hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg z-40">
+            <!-- Poignée de glissement -->
+            <div class="absolute top-2 left-1/2 transform -translate-x-1/2 w-10 h-1 bg-gray-300 rounded-full"></div>
+            
+            <div class="p-4 pt-6">
+                <h2 class="font-bold text-lg mb-4">Votre commande</h2>
+                
+                <div id="cart-items" class="space-y-3 max-h-60 overflow-y-auto">
+                    <!-- Les éléments du panier seront ajoutés ici dynamiquement -->
+                    <div class="empty-cart-message text-center text-gray-500 py-4">
+                        Votre panier est vide
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-3 mt-3">
+                    <div class="flex justify-between font-bold">
+                        <span>Total:</span>
+                        <span id="cart-total">0,00 $</span>
+                    </div>
+                    
+                    <button id="checkout-btn" class="w-full bg-kin-green text-white p-3 rounded-lg font-medium mt-4 disabled:opacity-50" disabled>
+                        Commander • <span id="cart-total-items">0</span> article(s)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de commande -->
+        <div id="order-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg p-5 w-11/12 max-w-md">
+                <h2 class="text-xl font-bold mb-4 text-center">Finaliser la commande</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-medium mb-2">Type de commande</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button class="delivery-option p-3 bg-kin-green-light text-kin-green rounded-lg text-center" data-type="takeaway">
+                                <i data-lucide="shopping-bag" class="mx-auto mb-1" width="20" height="20"></i>
+                                <span>À emporter</span>
+                            </button>
+                            <button class="delivery-option p-3 bg-gray-100 text-gray-600 rounded-lg text-center" data-type="table">
+                                <i data-lucide="utensils" class="mx-auto mb-1" width="20" height="20"></i>
+                                <span>Sur place</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="table-section" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Numéro de table</label>
+                        <div class="flex space-x-2">
+                            <input type="number" placeholder="Numéro" class="flex-1 p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-kin-green">
+                            <button id="scan-qr-btn" class="bg-kin-green text-white p-3 rounded-lg">
+                                <i data-lucide="camera" width="20" height="20"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button id="confirm-order-btn" class="w-full bg-kin-green text-white p-3 rounded-lg font-medium mt-4">
+                        Confirmer la commande
+                    </button>
+                </div>
+                
+                <button class="close-modal absolute top-4 right-4 text-gray-500">
+                    <i data-lucide="x" width="20" height="20"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Scanner QR Code -->
+        <div id="qr-scanner" class="fixed inset-0 bg-black z-50 hidden">
+            <div class="relative h-full">
+                <div class="scanner-overlay"></div>
+                <div class="absolute top-4 left-4 text-white">
+                    <button id="close-scanner" class="p-2 bg-black bg-opacity-50 rounded-full">
+                        <i data-lucide="x" width="24" height="24"></i>
+                    </button>
+                </div>
+                <div class="absolute bottom-10 left-0 right-0 text-white text-center">
+                    <p>Scannez le QR code sur la table</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suivi de commande -->
+        <div id="order-tracking" class="fixed inset-0 bg-white z-50 hidden">
+            <div class="p-5">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold">Suivi de commande</h2>
+                    <button class="close-tracking p-2 rounded-full bg-gray-100">
+                        <i data-lucide="x" width="20" height="20"></i>
+                    </button>
+                </div>
+                
+                <div class="bg-kin-green-light p-4 rounded-lg mb-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-medium">Commande #12345</p>
+                            <p class="text-sm">3 articles • 24,97 $</p>
+                        </div>
+                        <span class="bg-kin-green text-white px-3 py-1 rounded-full text-sm">En préparation</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="font-medium mb-3">État de la commande</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full bg-kin-green text-white flex items-center justify-center mr-3">
+                                    <i data-lucide="check" width="16" height="16"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Confirmée</p>
+                                    <p class="text-sm text-gray-500">12:05</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full bg-kin-green text-white flex items-center justify-center mr-3">
+                                    <i data-lucide="check" width="16" height="16"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">En préparation</p>
+                                    <p class="text-sm text-gray-500">12:10</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center mr-3">
+                                    <i data-lucide="clock" width="16" height="16"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Prête</p>
+                                    <p class="text-sm text-gray-500">En attente</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center mr-3">
+                                    <i data-lucide="clock" width="16" height="16"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Servie</p>
+                                    <p class="text-sm text-gray-500">En attente</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-medium mb-3">Détails de la commande</h3>
+                        <div class="bg-gray-100 p-3 rounded-lg">
+                            <div class="flex justify-between mb-2">
+                                <span>Poulet Braisé</span>
+                                <span>12,99 $</span>
+                            </div>
+                            <div class="flex justify-between mb-2">
+                                <span>Beignets</span>
+                                <span>5,99 $</span>
+                            </div>
+                            <div class="flex justify-between mb-2">
+                                <span>Mango Delight</span>
+                                <span>6,99 $</span>
+                            </div>
+                            <div class="border-t border-gray-300 pt-2 mt-2 font-bold flex justify-between">
+                                <span>Total</span>
+                                <span>24,97 $</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialisation des icônes Lucide
+        lucide.createIcons();
+
+        // Données factices de menu (pour la démonstration)
+        const menuItems = [
+            {
+                id: 1,
+                name: "Poulet Braisé",
+                description: "Poulet mariné et grillé, servi avec plantain et légumes",
+                price: 12.99,
+                category: "plats",
+                rating: 4.5,
+                reviews: 128,
+                image: "#"
+            },
+            {
+                id: 2,
+                name: "Saka Saka",
+                description: "Feuilles de manioc avec poisson et banane plantain",
+                price: 10.99,
+                category: "plats",
+                rating: 4.7,
+                reviews: 98,
+                image: "#"
+            },
+            {
+                id: 3,
+                name: "Beignets",
+                description: "Beignets d'acra de morue, sauce piquante",
+                price: 5.99,
+                category: "entrees",
+                rating: 4.3,
+                reviews: 76,
+                image: "#"
+            },
+            {
+                id: 4,
+                name: "Mango Delight",
+                description: "Mango fraîche avec glace vanille et coulis de fruit de la passion",
+                price: 6.99,
+                category: "desserts",
+                rating: 4.8,
+                reviews: 54,
+                image: "#"
+            },
+            {
+                id: 5,
+                name: "Jus de Bissap",
+                description: "Jus d'hibiscus frais naturellement sucré",
+                price: 3.99,
+                category: "boissons",
+                rating: 4.6,
+                reviews: 42,
+                image: "#"
+            }
+        ];
+
+        // Variables globales
+        let cart = [];
+        let currentOrder = null;
+        let selectedOrderType = null;
+
+        // Cacher l'écran de démarrage après 2.5 secondes
+        setTimeout(() => {
+            document.getElementById('splash-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('app').classList.add('fade-in');
+            
+            // Initialiser les écouteurs d'événements
+            initEventListeners();
+            
+            // Initialiser l'indicateur de catégorie
+            initCategoryIndicator();
+        }, 2500);
+
+        // Initialiser les écouteurs d'événements
+        function initEventListeners() {
+            // Bouton panier
+            document.getElementById('cart-button').addEventListener('click', toggleCart);
+            
+            // Boutons d'ajout au panier
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const menuItemCard = e.target.closest('.menu-item-card');
+                    const itemId = parseInt(menuItemCard.dataset.id);
+                    addToCart(itemId);
+                });
+            });
+            
+            // Boutons de catégorie
+            document.querySelectorAll('.category-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const category = e.target.dataset.category;
+                    filterMenuByCategory(category);
+                    updateCategoryIndicator(e.target);
+                });
+            });
+            
+            // Glissement pour le panier
+            const cartPanel = document.getElementById('cart-panel');
+            let startY = 0;
+            
+            cartPanel.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+            }, { passive: true });
+            
+            cartPanel.addEventListener('touchmove', (e) => {
+                const currentY = e.touches[0].clientY;
+                const diff = currentY - startY;
+                
+                if (diff > 0) {
+                    e.preventDefault();
+                    cartPanel.style.transform = `translateY(${diff}px)`;
+                }
+            }, { passive: false });
+            
+            cartPanel.addEventListener('touchend', (e) => {
+                const currentY = e.changedTouches[0].clientY;
+                const diff = currentY - startY;
+                
+                if (diff > 50) {
+                    cartPanel.classList.add('hidden');
+                } else {
+                    cartPanel.style.transform = '';
+                }
+            });
+            
+            // Bouton de commande
+            document.getElementById('checkout-btn').addEventListener('click', () => {
+                document.getElementById('order-modal').classList.remove('hidden');
+            });
+            
+            // Options de type de commande
+            document.querySelectorAll('.delivery-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    // Retirer la sélection précédente
+                    document.querySelectorAll('.delivery-option').forEach(btn => {
+                        btn.classList.remove('bg-kin-green-light', 'text-kin-green');
+                        btn.classList.add('bg-gray-100', 'text-gray-600');
+                    });
+                    
+                    // Appliquer la nouvelle sélection
+                    e.target.classList.remove('bg-gray-100', 'text-gray-600');
+                    e.target.classList.add('bg-kin-green-light', 'text-kin-green');
+                    
+                    selectedOrderType = e.target.dataset.type;
+                    
+                    // Afficher la section table si nécessaire
+                    if (selectedOrderType === 'table') {
+                        document.getElementById('table-section').classList.remove('hidden');
+                    } else {
+                        document.getElementById('table-section').classList.add('hidden');
+                    }
+                });
+            });
+            
+            // Bouton scan QR
+            document.getElementById('scan-qr-btn').addEventListener('click', () => {
+                document.getElementById('qr-scanner').classList.remove('hidden');
+            });
+            
+            // Fermer le scanner
+            document.getElementById('close-scanner').addEventListener('click', () => {
+                document.getElementById('qr-scanner').classList.add('hidden');
+            });
+            
+            // Confirmer la commande
+            document.getElementById('confirm-order-btn').addEventListener('click', () => {
+                placeOrder();
+            });
+            
+            // Fermer les modals
+            document.querySelectorAll('.close-modal').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.getElementById('order-modal').classList.add('hidden');
+                });
+            });
+            
+            // Fermer le suivi de commande
+            document.querySelector('.close-tracking').addEventListener('click', () => {
+                document.getElementById('order-tracking').classList.add('hidden');
+            });
+        }
+        
+        // Initialiser l'indicateur de catégorie
+        function initCategoryIndicator() {
+            const firstCategory = document.querySelector('.category-btn');
+            updateCategoryIndicator(firstCategory);
+        }
+        
+        // Mettre à jour l'indicateur de catégorie
+        function updateCategoryIndicator(activeButton) {
+            const indicator = document.getElementById('category-indicator');
+            const rect = activeButton.getBoundingClientRect();
+            const containerRect = activeButton.parentElement.getBoundingClientRect();
+            
+            indicator.style.width = `${rect.width}px`;
+            indicator.style.left = `${rect.left - containerRect.left}px`;
+        }
+        
+        // Filtrer le menu par catégorie
+        function filterMenuByCategory(category) {
+            const menuItems = document.querySelectorAll('.menu-item-card');
+            
+            menuItems.forEach(item => {
+                if (category === 'all' || item.dataset.category === category) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Ajouter un article au panier
+        function addToCart(itemId) {
+            const item = menuItems.find(i => i.id === itemId);
+            
+            if (item) {
+                // Vérifier si l'article est déjà dans le panier
+                const existingItem = cart.find(i => i.id === itemId);
+                
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({
+                        ...item,
+                        quantity: 1
+                    });
+                }
+                
+                updateCartUI();
+                
+                // Afficher une confirmation
+                showToast(`${item.name} ajouté au panier`);
+            }
+        }
+        
+        // Mettre à jour l'interface du panier
+        function updateCartUI() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartTotal = document.getElementById('cart-total');
+            const cartTotalItems = document.getElementById('cart-total-items');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            
+            // Mettre à jour le badge du panier
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            if (totalItems > 0) {
+                cartCount.textContent = totalItems;
+                cartCount.classList.remove('hidden');
+                checkoutBtn.disabled = false;
+            } else {
+                cartCount.classList.add('hidden');
+                checkoutBtn.disabled = true;
+            }
+            
+            // Mettre à jour les éléments du panier
+            cartItemsContainer.innerHTML = '';
+            
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<div class="empty-cart-message text-center text-gray-500 py-4">Votre panier est vide</div>';
+            } else {
+                cart.forEach(item => {
+                    const cartItemElement = document.createElement('div');
+                    cartItemElement.className = 'flex justify-between items-center';
+                    cartItemElement.innerHTML = `
+                        <div>
+                            <p class="font-medium">${item.name}</p>
+                            <p class="text-sm text-gray-500">${item.price.toFixed(2)} $</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="decrease-quantity w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center" data-id="${item.id}">
+                                <i data-lucide="minus" width="14" height="14"></i>
+                            </button>
+                            <span>${item.quantity}</span>
+                            <button class="increase-quantity w-6 h-6 rounded-full bg-kin-green text-white flex items-center justify-center" data-id="${item.id}">
+                                <i data-lucide="plus" width="14" height="14"></i>
+                            </button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(cartItemElement);
+                });
+                
+                // Ajouter les écouteurs d'événements pour les boutons de quantité
+                document.querySelectorAll('.increase-quantity').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const itemId = parseInt(e.target.closest('button').dataset.id);
+                        increaseQuantity(itemId);
+                    });
+                });
+                
+                document.querySelectorAll('.decrease-quantity').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const itemId = parseInt(e.target.closest('button').dataset.id);
+                        decreaseQuantity(itemId);
+                    });
+                });
+            }
+            
+            // Mettre à jour le total
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            cartTotal.textContent = `${total.toFixed(2)} $`;
+            cartTotalItems.textContent = totalItems;
+        }
+        
+        // Augmenter la quantité d'un article
+        function increaseQuantity(itemId) {
+            const item = cart.find(i => i.id === itemId);
+            if (item) {
+                item.quantity += 1;
+                updateCartUI();
+            }
+        }
+        
+        // Diminuer la quantité d'un article
+        function decreaseQuantity(itemId) {
+            const item = cart.find(i => i.id === itemId);
+            if (item) {
+                item.quantity -= 1;
+                
+                if (item.quantity <= 0) {
+                    cart = cart.filter(i => i.id !== itemId);
+                }
+                
+                updateCartUI();
+            }
+        }
+        
+        // Basculer l'affichage du panier
+        function toggleCart() {
+            const cartPanel = document.getElementById('cart-panel');
+            
+            if (cartPanel.classList.contains('hidden')) {
+                cartPanel.classList.remove('hidden');
+            } else {
+                cartPanel.classList.add('hidden');
+            }
+        }
+        
+        // Passer la commande
+        function placeOrder() {
+            if (cart.length === 0) {
+                showToast('Votre panier est vide');
+                return;
+            }
+            
+            if (!selectedOrderType) {
+                showToast('Veuillez choisir un type de commande');
+                return;
+            }
+            
+            // Simuler le placement de commande
+            currentOrder = {
+                id: Math.floor(Math.random() * 10000),
+                items: [...cart],
+                status: 'confirmed',
+                type: selectedOrderType,
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                timestamp: new Date()
+            };
+            
+            // Vider le panier
+            cart = [];
+            updateCartUI();
+            
+            // Fermer le modal de commande
+            document.getElementById('order-modal').classList.add('hidden');
+            
+            // Afficher le suivi de commande
+            document.getElementById('order-tracking').classList.remove('hidden');
+            
+            // Afficher une confirmation
+            showToast('Commande passée avec succès!');
+        }
+        
+        // Afficher un toast de notification
+        function showToast(message) {
+            // Créer l'élément toast s'il n'existe pas
+            let toast = document.getElementById('toast');
+            
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast';
+                toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 opacity-0 transition-opacity duration-300';
+                document.body.appendChild(toast);
+            }
+            
+            // Mettre à jour le message et afficher
+            toast.textContent = message;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            
+            // Cacher après 3 secondes
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        // Enregistrer le Service Worker pour la PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('SW enregistré: ', registration);
+                }).catch(registrationError => {
+                    console.log('Échec d\'enregistrement du SW: ', registrationError);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

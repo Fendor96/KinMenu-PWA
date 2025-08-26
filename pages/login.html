@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="author" content="Axel Nodier">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Pacifico&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Slab:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary-color: #ff8c00;
+            --secondary-color: #00930c;
+            --tertiary-color: #df7301;
+            --background-color: #f8f9fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            width: 100%;
+            display: flex;
+            padding: 10px 20px;
+            height: 70px;
+            background-color: var(--primary-color);
+            z-index: 1000;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .logo-container {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .user-container {
+            display: flex;
+            align-items: center;
+            width: 50%;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        #logo {
+            font-family: 'Pacifico', cursive;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        header a {
+            color: white;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: background-color 0.3s;
+        }
+
+        header a:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        #map-container {
+            flex: 1;
+            width: 100%;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .search-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            background: white;
+            border-radius: 25px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        #quickSearch-bar {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .search-container button {
+            padding: 0 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-container button:hover {
+            background: var(--tertiary-color);
+        }
+
+        .filters-container {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+        }
+
+        .quickBtn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            background: var(--card-color);
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .quickBtn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .quickBtn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        #navigation-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: white;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 0.8rem;
+            transition: color 0.3s;
+        }
+
+        .nav-btn i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .nav-btn.active {
+            color: var(--primary-color);
+        }
+
+        /* Floating reload button */
+        .reload-location {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            z-index: 1000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reload-location:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: rotate(30deg);
+        }
+
+        /* Location access modal */
+        .location-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .modal-content p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* Manual location input */
+        .manual-location {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .manual-location input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 140, 0, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* Location error message */
+        .location-error {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            z-index: 1001;
+            max-width: 80%;
+        }
+
+        .location-error button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Map type selector */
+        .map-type-selector {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .map-type-btn {
+            padding: 10px 15px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+
+        .map-type-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .map-type-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .filters-container {
+                bottom: 80px;
+                width: 90%;
+                overflow-x: auto;
+                justify-content: flex-start;
+            }
+            
+            .filters-container::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .quickBtn {
+                white-space: nowrap;
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            #logo {
+                font-size: 1.5rem;
+            }
+
+            .map-type-selector {
+                top: 70px;
+                right: 10px;
+            }
+
+            .map-type-btn {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+    <title>Kin Menu</title>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <span id="logo">Kin Menu</span>
+        </div>
+        
+        <div class="user-container">
+            <a href="./pages/login.php"><i class="fa-solid fa-user"></i></a>
+        </div>
+    </header>
+
+    <main id="map-container">
+        <div id="map"></div>
+        
+        <div class="search-container">
+            <input type="search" id="quickSearch-bar" placeholder="Rechercher un restaurant...">
+            <button id="search-button"><i class="fa-solid fa-search"></i></button>
+        </div>
+        
+        <div class="filters-container">
+            <button class="quickBtn active" data-filter="proximity"><i class="fa-solid fa-location-dot"></i> À proximité</button>
+            <button class="quickBtn" data-filter="price"><i class="fa-solid fa-ticket"></i> Moins de 20 $</button>
+            <button class="quickBtn" data-filter="top"><i class="fa-solid fa-trophy"></i> Top 5</button>
+        </div>
+        
+        <div class="reload-location" id="reload-location">
+            <i class="fas fa-location-arrow"></i>
+        </div>
+
+        <div class="map-type-selector">
+            <button class="map-type-btn active" id="roadmap-btn" data-type="roadmap">
+                <i class="fas fa-map"></i> Carte
+            </button>
+            <button class="map-type-btn" id="satellite-btn" data-type="satellite">
+                <i class="fas fa-globe"></i> Satellite
+            </button>
+        </div>
+        
+        <div class="spinner" id="loading-spinner"></div>
+        
+        <div class="location-error" id="location-error" style="display: none;">
+            <p>Impossible d'accéder à votre position. Veuillez vérifier les paramètres de localisation de votre appareil.</p>
+            <button id="retry-location">Réessayer</button>
+            <button id="manual-location-btn">Entrer manuellement</button>
+        </div>
+        
+        <!-- Location Access Modal -->
+        <div class="location-modal" id="location-modal">
+            <div class="modal-content">
+                <h2>Accès à la localisation</h2>
+                <p>Kin Menu a besoin de votre position pour trouver les restaurants à proximité. Voulez-vous partager votre position?</p>
+                <div class="modal-buttons">
+                    <button class="modal-btn btn-primary" id="allow-location">Autoriser</button>
+                    <button class="modal-btn btn-secondary" id="deny-location">Plus tard</button>
+                </div>
+                <div class="manual-location" id="manual-location">
+                    <p>Ou entrez votre emplacement manuellement:</p>
+                    <input type="text" id="location-input" placeholder="Ex: Paris, France">
+                    <button class="modal-btn btn-primary" id="submit-location">Valider</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section id="navigation-bottom">
+        <div class="nav-btn active" data-view="map">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Carte</span>
+        </div>
+        <div class="nav-btn" data-view="restaurants">
+            <i class="fas fa-utensils"></i>
+            <span>Restaurants</span>
+        </div>
+        <div class="nav-btn" data-view="favorites">
+            <i class="fas fa-heart"></i>
+            <span>Favoris</span>
+        </div>
+        <div class="nav-btn" data-view="profile">
+            <i class="fas fa-user"></i>
+            <span>Profil</span>
+        </div>
+    </section>
+
+    <!-- Google Maps API -->
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHEl_PcZNa47bk3hsdhmiVi4vA1f8q8UI&callback=console.debug&libraries=maps,marker&v=beta"></script>
+
+    <script>
+        // Initialize variables
+        let map, userMarker, userLocation;
+        let restaurants = [];
+        let googleMarkers = [];
+        let locationAccessRequested = false;
+
+        // Initialize Google Maps
+        function initMap() {
+            // Check if we have a user location already
+            if (userLocation) {
+                createMap(userLocation.latitude, userLocation.longitude);
+            } else {
+                // Show location access modal
+                showLocationModal();
+            }
+        }
+
+        // Create Google Map
+        function createMap(lat, lng) {
+            const mapOptions = {
+                zoom: 15,
+                center: { lat: lat, lng: lng },
+                mapTypeId: 'roadmap',
+                styles: [
+                    {
+                        "featureType": "poi",
+                        "stylers": [{ "visibility": "on" }]
+                    },
+                    {
+                        "featureType": "poi.restaurant",
+                        "stylers": [{ "visibility": "on" }]
+                    }
+                ]
+            };
+            
+            map = new google.maps.Map(document.getElementById('map'), mapOptions);
+            
+            // Add user location marker
+            userMarker = new google.maps.Marker({
+                position: { lat: lat, lng: lng },
+                map: map,
+                title: 'Votre position',
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 10,
+                    fillColor: '#ff8c00',
+                    fillOpacity: 1,
+                    strokeColor: '#FFFFFF',
+                    strokeWeight: 2
+                }
+            });
+            
+            // Add info window for user location
+            const infoWindow = new google.maps.InfoWindow({
+                content: '<div style="padding: 10px;"><strong>Votre position</strong></div>'
+            });
+            
+            userMarker.addListener('click', () => {
+                infoWindow.open(map, userMarker);
+            });
+            
+            // Add restaurant markers
+            addRestaurantMarkers();
+            
+            // Hide loading spinner
+            document.getElementById('loading-spinner').style.display = 'none';
+        }
+
+        // Add restaurant markers to the map
+        function addRestaurantMarkers() {
+            // Clear existing markers
+            clearRestaurantMarkers();
+            
+            // Sample restaurant data
+            restaurants = [
+                { 
+                    id: 1,
+                    name: "Le Gourmet Parisien", 
+                    lat: 48.8566 + (Math.random() * 0.01 - 0.005), 
+                    lng: 2.3522 + (Math.random() * 0.01 - 0.005), 
+                    price: "$$", 
+                    rating: "A",
+                    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cmVzdGF1cmFudHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60",
+                    distance: 0.5,
+                    commune: "Paris 1er"
+                },
+                { 
+                    id: 2,
+                    name: "La Piazza Italiana", 
+                    lat: 48.8584 + (Math.random() * 0.01 - 0.005), 
+                    lng: 2.3545 + (Math.random() * 0.01 - 0.005), 
+                    price: "$", 
+                    rating: "B",
+                    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8cmVzdGF1cmFudHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60",
+                    distance: 0.8,
+                    commune: "Paris 4ème"
+                },
+                { 
+                    id: 3,
+                    name: "Sushi Tokyo", 
+                    lat: 48.8570 + (Math.random() * 0.01 - 0.005), 
+                    lng: 2.3550 + (Math.random() * 0.01 - 0.005), 
+                    price: "$$$", 
+                    rating: "A",
+                    image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fHJlc3RhdXJhbnR8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60",
+                    distance: 1.2,
+                    commune: "Paris 3ème"
+                },
+                { 
+                    id: 4,
+                    name: "Burger House", 
+                    lat: 48.8558 + (Math.random() * 0.01 - 0.005), 
+                    lng: 2.3560 + (Math.random() * 0.01 - 0.005), 
+                    price: "$", 
+                    rating: "C",
+                    image: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTZ8fHJlc3RhdXJhbnR8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60",
+                    distance: 0.9,
+                    commune: "Paris 2ème"
+                },
+                { 
+                    id: 5,
+                    name: "Le Bistro Français", 
+                    lat: 48.8575 + (Math.random() * 0.01 - 0.005), 
+                    lng: 2.3535 + (Math.random() * 0.01 - 0.005), 
+                    price: "$$", 
+                    rating: "B",
+                    image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fHJlc3RhdXJhbnR8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60",
+                    distance: 1.5,
+                    commune: "Paris 5ème"
+                }
+            ];
+            
+            restaurants.forEach(restaurant => {
+                // Calculate distance from user (simplified)
+                const distance = calculateDistance(
+                    userLocation.latitude, 
+                    userLocation.longitude, 
+                    restaurant.lat, 
+                    restaurant.lng
+                );
+                restaurant.distance = distance;
+                
+                // Create marker
+                const marker = new google.maps.Marker({
+                    position: { lat: restaurant.lat, lng: restaurant.lng },
+                    map: map,
+                    title: restaurant.name,
+                    icon: {
+                        url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+                            <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="20" cy="20" r="18" fill="#00930c" stroke="white" stroke-width="2"/>
+                                <text x="20" y="26" text-anchor="middle" fill="white" font-weight="bold" font-size="14">${restaurant.price.length}</text>
+                            </svg>
+                        `),
+                        scaledSize: new google.maps.Size(40, 40),
+                        origin: new google.maps.Point(0, 0),
+                        anchor: new google.maps.Point(20, 20)
+                    }
+                });
+                
+                // Create info window content
+                const content = `
+                    <div style="min-width: 200px; padding: 10px;">
+                        <h3 style="margin-bottom: 10px;">${restaurant.name}</h3>
+                        <p style="margin-bottom: 5px;">Prix: ${restaurant.price}</p>
+                        <p style="margin-bottom: 5px;">Classement: ${restaurant.rating}</p>
+                        <p style="margin-bottom: 10px;">Distance: ${distance.toFixed(1)} km</p>
+                        <button style="background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; width: 100%;">Voir menu</button>
+                    </div>
+                `;
+                
+                const infoWindow = new google.maps.InfoWindow({
+                    content: content
+                });
+                
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+                
+                // Store reference to marker
+                googleMarkers.push(marker);
+            });
+        }
+
+        // Clear all restaurant markers
+        function clearRestaurantMarkers() {
+            for (let i = 0; i < googleMarkers.length; i++) {
+                googleMarkers[i].setMap(null);
+            }
+            googleMarkers = [];
+        }
+
+        // Calculate distance between two coordinates (simplified)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            return R * c;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI/180);
+        }
+
+        // Show location access modal
+        function showLocationModal() {
+            document.getElementById('location-modal').style.display = 'flex';
+            
+            // If not secure, show additional warning for mobile users
+            if (!isSecure()) {
+                const modalContent = document.querySelector('.modal-content p');
+                modalContent.innerHTML += '<br><br><strong>Note:</strong> Pour les appareils mobiles, la localisation fonctionne mieux avec une connexion HTTPS.';
+                
+                // Show manual location option more prominently
+                document.getElementById('manual-location').style.display = 'block';
+            }
+        }
+
+        // Hide location access modal
+        function hideLocationModal() {
+            document.getElementById('location-modal').style.display = 'none';
+        }
+
+        // Get user's location
+        function getUserLocation() {
+            // Show loading spinner
+            document.getElementById('loading-spinner').style.display = 'block';
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        userLocation = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        };
+                        createMap(userLocation.latitude, userLocation.longitude);
+                        hideLocationModal();
+                    },
+                    error => {
+                        console.error("Error getting location:", error);
+                        document.getElementById('loading-spinner').style.display = 'none';
+                        document.getElementById('location-error').style.display = 'block';
+                        
+                        // Show appropriate error message
+                        let errorMsg = "Impossible d'accéder à votre position.";
+                        
+                        if (error.code === error.PERMISSION_DENIED) {
+                            errorMsg = "L'accès à votre position a été refusé. Veuillez autoriser l'accès à la localisation dans les paramètres de votre navigateur.";
+                        } else if (error.code === error.POSITION_UNAVAILABLE) {
+                            errorMsg = "Les informations de localisation ne sont pas disponibles.";
+                        } else if (error.code === error.TIMEOUT) {
+                            errorMsg = "La demande de localisation a expiré.";
+                        }
+                        
+                        document.getElementById('location-error').querySelector('p').textContent = errorMsg;
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+                );
+            } else {
+                alert("La géolocalisation n'est pas supportée par ce navigateur.");
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('location-error').style.display = 'block';
+            }
+        }
+
+        // Use a default location (Paris)
+        function useDefaultLocation() {
+            userLocation = { latitude: 48.8566, longitude: 2.3522 };
+            createMap(userLocation.latitude, userLocation.longitude);
+            hideLocationModal();
+        }
+
+        // Reload location
+        function reloadLocation() {
+            // If we're not on HTTPS, especially on mobile, show the modal again
+            if (!isSecure() && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                showLocationModal();
+            } else {
+                getUserLocation();
+            }
+        }
+
+        // Check if the page is served over HTTPS
+        function isSecure() {
+            return window.location.protocol === 'https:';
+        }
+
+        // Change map type
+        function setMapType(mapType) {
+            if (map) {
+                map.setMapTypeId(mapType);
+                
+                // Update active button
+                document.querySelectorAll('.map-type-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.getElementById(`${mapType}-btn`).classList.add('active');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('retry-location').addEventListener('click', function() {
+            document.getElementById('location-error').style.display = 'none';
+            reloadLocation();
+        });
+
+        document.getElementById('manual-location-btn').addEventListener('click', function() {
+            document.getElementById('location-error').style.display = 'none';
+            showLocationModal();
+        });
+
+        document.getElementById('reload-location').addEventListener('click', reloadLocation);
+
+        document.getElementById('allow-location').addEventListener('click', getUserLocation);
+
+        document.getElementById('deny-location').addEventListener('click', useDefaultLocation);
+
+        document.getElementById('submit-location').addEventListener('click', function() {
+            const locationText = document.getElementById('location-input').value;
+            if (locationText) {
+                // In a real app, you would geocode this address
+                // For now, we'll just use a default location
+                useDefaultLocation();
+            }
+        });
+
+        // Map type buttons
+        document.getElementById('roadmap-btn').addEventListener('click', function() {
+            setMapType('roadmap');
+        });
+
+        document.getElementById('satellite-btn').addEventListener('click', function() {
+            setMapType('satellite');
+        });
+
+        // Check if we need to ask for location access
+        function checkLocationAccess() {
+            // For mobile devices on HTTP, show the modal immediately
+            if (!isSecure() && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                showLocationModal();
+            } else {
+                // For others, try to get location directly
+                getUserLocation();
+            }
+        }
+
+        // Initialize the app
+        window.initMap = initMap;
+    </script>
+</body>
+</html>

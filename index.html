@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="author" content="Axel Nodier">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Pacifico&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Slab:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        :root {
+            --primary-color: #ff8c00;
+            --secondary-color: #00930c;
+            --tertiary-color: #df7301;
+            --background-color: #f8f9fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            width: 100%;
+            display: flex;
+            padding: 10px 20px;
+            height: 70px;
+            background-color: var(--primary-color);
+            z-index: 1000;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .logo-container {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .user-container {
+            display: flex;
+            align-items: center;
+            width: 50%;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        #logo {
+            font-family: 'Pacifico', cursive;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        header a {
+            color: white;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: background-color 0.3s;
+        }
+
+        header a:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        #map-container {
+            flex: 1;
+            width: 100%;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .search-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            background: white;
+            border-radius: 25px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        #quickSearch-bar {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .search-container button {
+            padding: 0 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-container button:hover {
+            background: var(--tertiary-color);
+        }
+
+        .filters-container {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+        }
+
+        .quickBtn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            background: var(--card-color);
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .quickBtn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .quickBtn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        #navigation-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: white;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 0.8rem;
+            transition: color 0.3s;
+        }
+
+        .nav-btn i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .nav-btn.active {
+            color: var(--primary-color);
+        }
+
+        /* Floating reload button */
+        .reload-location {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            z-index: 1000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reload-location:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: rotate(30deg);
+        }
+
+        /* Map type selector */
+        .map-type-selector {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-type-btn {
+            padding: 10px 15px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+
+        .map-type-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .map-type-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 140, 0, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* Location error message */
+        .location-error {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            z-index: 1001;
+            max-width: 80%;
+            display: none;
+        }
+
+        .location-error button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        /* Advanced search panel */
+        .search-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70vh;
+            background: white;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            transform: translateY(calc(100% - 70px));
+            transition: transform 0.4s ease-out;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .search-panel.open {
+            transform: translateY(0);
+        }
+
+        .search-panel-handle {
+            width: 50px;
+            height: 5px;
+            background: #ddd;
+            border-radius: 10px;
+            margin: 0 auto 20px;
+            cursor: pointer;
+        }
+
+        .search-panel h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .search-submit {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        .search-submit:hover {
+            background: var(--tertiary-color);
+        }
+
+        /* Results section */
+        .results-container {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 150px);
+            background: white;
+            z-index: 1500;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-to-map {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .restaurant-card {
+            display: flex;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            background: white;
+        }
+
+        .restaurant-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+        .restaurant-info {
+            flex: 1;
+        }
+
+        .restaurant-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .restaurant-details {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .restaurant-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .view-menu {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .view-map {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        /* Restaurant popup styling */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            padding: 1px;
+        }
+
+        .leaflet-popup-content {
+            margin: 12px;
+        }
+
+        .restaurant-popup h3 {
+            margin: 0 0 8px 0;
+            color: var(--primary-color);
+        }
+
+        .restaurant-popup p {
+            margin: 4px 0;
+        }
+
+        .restaurant-popup button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .filters-container {
+                bottom: 90px; /* Adjusted to be above the navigation */
+                width: 90%;
+                overflow-x: auto;
+                justify-content: flex-start;
+                padding: 8px;
+            }
+            
+            .filters-container::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .quickBtn {
+                white-space: nowrap;
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            #logo {
+                font-size: 1.5rem;
+            }
+
+            .map-type-selector {
+                top: 70px;
+                right: 10px;
+            }
+
+            .map-type-btn {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+
+            .search-panel {
+                height: 80vh;
+                transform: translateY(calc(100% - 60px));
+            }
+
+            #navigation-bottom {
+                height: 70px;
+            }
+
+            .nav-btn {
+                font-size: 0.7rem;
+            }
+
+            .nav-btn i {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+    <title>Kin Menu - OpenStreetMap</title>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <span id="logo">Kin Menu</span>
+        </div>
+        
+        <div class="user-container">
+            <a href="./pages/login.php"><i class="fa-solid fa-user"></i></a>
+        </div>
+    </header>
+
+    <main id="map-container">
+        <div id="map"></div>
+        
+        <div class="search-container">
+            <input type="search" id="quickSearch-bar" placeholder="Rechercher un restaurant...">
+            <button id="search-button"><i class="fa-solid fa-search"></i></button>
+        </div>
+        
+        <div class="filters-container">
+            <button class="quickBtn active" data-filter="proximity"><i class="fa-solid fa-location-dot"></i> À proximité</button>
+            <button class="quickBtn" data-filter="price"><i class="fa-solid fa-ticket"></i> Moins de 20 $</button>
+            <button class="quickBtn" data-filter="top"><i class="fa-solid fa-trophy"></i> Top 5</button>
+        </div>
+        
+        <div class="reload-location" id="reload-location">
+            <i class="fas fa-location-arrow"></i>
+        </div>
+
+        <div class="map-type-selector">
+            <button class="map-type-btn active" id="standard-btn" data-type="standard">
+                <i class="fas fa-map"></i> Standard
+            </button>
+            <button class="map-type-btn" id="satellite-btn" data-type="satellite">
+                <i class="fas fa-globe"></i> Satellite
+            </button>
+        </div>
+        
+        <div class="spinner" id="loading-spinner"></div>
+        
+        <div class="location-error" id="location-error">
+            <p id="error-message">Impossible d'accéder à votre position. Veuillez vérifier les paramètres de localisation de votre appareil.</p>
+            <button id="retry-location">Réessayer</button>
+            <button id="use-default-location">Utiliser Paris</button>
+        </div>
+
+        <!-- Advanced Search Panel -->
+        <div class="search-panel" id="search-panel">
+            <div class="search-panel-handle" id="panel-handle"></div>
+            <h2>Recherche Avancée</h2>
+            
+            <div class="form-group">
+                <label for="restaurant-name">Nom du restaurant</label>
+                <input type="text" id="restaurant-name" placeholder="Entrez le nom">
+            </div>
+            
+            <div class="form-group">
+                <label for="budget">Budget maximum (€)</label>
+                <input type="range" id="budget" min="5" max="100" step="5" value="30">
+                <output for="budget" id="budget-value">30 €</output>
+            </div>
+            
+            <div class="form-group">
+                <label for="people">Nombre de personnes</label>
+                <input type="number" id="people" min="1" max="20" value="2">
+            </div>
+            
+            <div class="form-group">
+                <label for="commune">Commune</label>
+                <input type="text" id="commune" placeholder="Entrez la commune">
+            </div>
+            
+            <div class="form-group">
+                <label for="rating">Classement minimum</label>
+                <select id="rating">
+                    <option value="A">A - Excellent</option>
+                    <option value="B" selected>B - Très bon</option>
+                    <option value="C">C - Bon</option>
+                    <option value="D">D - Moyen</option>
+                    <option value="E">E - Basique</option>
+                </select>
+            </div>
+            
+            <button class="search-submit" id="advanced-search-btn">Rechercher</button>
+        </div>
+        
+        <!-- Results Container -->
+        <div class="results-container" id="results-container">
+            <div class="result-header">
+                <h2>Résultats de recherche</h2>
+                <button class="back-to-map" id="back-to-map"><i class="fas fa-arrow-left"></i> Retour à la carte</button>
+            </div>
+            
+            <div id="restaurants-list">
+                <!-- Restaurant results will be populated here -->
+            </div>
+        </div>
+    </main>
+
+    <section id="navigation-bottom">
+        <div class="nav-btn active" data-view="map">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Carte</span>
+        </div>
+        <div class="nav-btn" data-view="restaurants">
+            <i class="fas fa-utensils"></i>
+            <span>Restaurants</span>
+        </div>
+        <div class="nav-btn" data-view="favorites">
+            <i class="fas fa-heart"></i>
+            <span>Favoris</span>
+        </div>
+        <div class="nav-btn" data-view="profile">
+            <i class="fas fa-user"></i>
+            <span>Profil</span>
+        </div>
+    </section>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        // Initialize variables
+        let map, userMarker, userLocation;
+        let restaurants = [];
+        let currentTiles = 'standard';
+        let isLoggedIn = false; // Change to true if user is logged in
+        
+        // Tile layers
+        const tileLayers = {
+            standard: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }),
+            satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            })
+        };
+
+        // Initialize the map
+        function initMap(lat, lng) {
+            // Initialize map
+            map = L.map('map').setView([lat, lng], 15);
+            
+            // Add the default tile layer
+            tileLayers.standard.addTo(map);
+            currentTiles = 'standard';
+            
+            // Update active button
+            document.querySelectorAll('.map-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('standard-btn').classList.add('active');
+            
+            // Add user location marker
+            userMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: 'user-location-marker',
+                    html: '<div style="background-color: #ff8c00; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                })
+            }).addTo(map);
+            
+            userMarker.bindPopup('Votre position').openPopup();
+            
+            // Add restaurant markers
+            addRestaurantMarkers();
+            
+            // Hide loading spinner
+            document.getElementById('loading-spinner').style.display = 'none';
+        }
+
+        // Add restaurant markers to the map
+        function addRestaurantMarkers() {
+            // Sample restaurant data
+            restaurants = [
+                { 
+                    id: 1,
+                    name: "Le Gourmet Parisien", 
+                    lat: 48.8566 + (Math.random() * 0.01 - 0.005), 
+                    lng: 2.3522 + (Math.random() * 0.01 - 0.005), 
+                    price: "$$", 
+                    rating: "A",
+                    budget: 35,
+                    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cmVzdGF1cmFudHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60",
+                    distance: 0.5,
+                    commune: "Paris 1er"
+                },
+                { 
+                    id: 2,
+                    name: "La Piazza Italiana", 
+                    lat: 48.8584 + (Math.random() * 0.01 - 0.005), 
+                    lng: 2.3545 + (Math.random() * 0.01 - 0.005), 
+                    price: "$", 
+                    rating: "B",
+                    budget: 15,
+                    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8cmVzdGF1cmFentHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60",
+                    distance: 0.8,
+                    commune: "Paris 4ème"
+                },
+                { 
+                    id: 3,
+                    name: "Sushi Tokyo", 
+                    lat: 48.8570 + (Math.random() * 0.01 - 0.005), 
+                    lng: 2.3550 + (Math.random() * 0.01 - 0.005), 
+                    price: "$$$", 
+                    rating: "A",
+                    budget: 65,
+                    image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fHJlc3RhdXJhbnR8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60",
+                    distance: 1.2,
+                    commune: "Paris 3ème"
+                },
+                { 
+                    id: 4,
+                    name: "Burger House", 
+                    lat: 48.8558 + (Math.random() * 0.01 - 0.005), 
+                    lng: 2.3560 + (Math.random() * 0.01 - 0.005), 
+                    price: "$", 
+                    rating: "C",
+                    budget: 12,
+                    image: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTZ8fHJlc3RhdXJhbnR8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60",
+                    distance: 0.9,
+                    commune: "Paris 2ème"
+                },
+                { 
+                    id: 5,
+                    name: "Le Bistro Français", 
+                    lat: 48.8575 + (Math.random() * 0.01 - 0.005), 
+                    lng: 2.3535 + (Math.random() * 0.01 - 0.005), 
+                    price: "$$", 
+                    rating: "B",
+                    budget: 28,
+                    image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fHJlc3RhdXJhbnR8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60",
+                    distance: 1.5,
+                    commune: "Paris 5ème"
+                }
+            ];
+            
+            restaurants.forEach(restaurant => {
+                // Calculate distance from user (simplified)
+                const distance = calculateDistance(
+                    userLocation.latitude, 
+                    userLocation.longitude, 
+                    restaurant.lat, 
+                    restaurant.lng
+                );
+                restaurant.distance = distance;
+                
+                // Create marker
+                const marker = L.marker([restaurant.lat, restaurant.lng], {
+                    icon: L.divIcon({
+                        className: 'restaurant-marker',
+                        html: `<div style="background-color: #00930c; color: white; width: 36px; height: 36px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 0 10px rgba(0,0,0,0.3);">${restaurant.price.length}</div>`,
+                        iconSize: [36, 36],
+                        iconAnchor: [18, 18]
+                    })
+                }).addTo(map);
+                
+                // Create popup content
+                const popupContent = `
+                    <div class="restaurant-popup">
+                        <h3>${restaurant.name}</h3>
+                        <p><strong>Prix:</strong> ${restaurant.price}</p>
+                        <p><strong>Classement:</strong> ${restaurant.rating}</p>
+                        <p><strong>Distance:</strong> ${distance.toFixed(1)} km</p>
+                        <p><strong>Commune:</strong> ${restaurant.commune}</p>
+                        <button onclick="viewRestaurantDetails(${restaurant.id})">Voir menu</button>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+            });
+        }
+
+        // Calculate distance between two coordinates
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            return R * c;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI/180);
+        }
+
+        // Get user's location
+        function getUserLocation() {
+            // Show loading spinner
+            document.getElementById('loading-spinner').style.display = 'block';
+            document.getElementById('location-error').style.display = 'none';
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        userLocation = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        };
+                        initMap(userLocation.latitude, userLocation.longitude);
+                    },
+                    error => {
+                        console.error("Error getting location:", error);
+                        document.getElementById('loading-spinner').style.display = 'none';
+                        document.getElementById('location-error').style.display = 'block';
+                        
+                        // Show appropriate error message
+                        let errorMsg = "Impossible d'accéder à votre position.";
+                        
+                        if (error.code === error.PERMISSION_DENIED) {
+                            errorMsg = "L'accès à votre position a été refusé. Veuillez autoriser l'accès à la localisation dans les paramètres de votre navigateur.";
+                        } else if (error.code === error.POSITION_UNAVAILABLE) {
+                            errorMsg = "Les informations de localisation ne sont pas disponibles.";
+                        } else if (error.code === error.TIMEOUT) {
+                            errorMsg = "La demande de localisation a expiré.";
+                        }
+                        
+                        document.getElementById('error-message').textContent = errorMsg;
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+                );
+            } else {
+                alert("La géolocalisation n'est pas supportée par ce navigateur.");
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('location-error').style.display = 'block';
+            }
+        }
+
+        // Use a default location (Paris)
+        function useDefaultLocation() {
+            userLocation = { latitude: 48.8566, longitude: 2.3522 };
+            initMap(userLocation.latitude, userLocation.longitude);
+            document.getElementById('location-error').style.display = 'none';
+        }
+
+        // Reload location
+        function reloadLocation() {
+            getUserLocation();
+        }
+
+        // Change map tile layer
+        function setMapType(type) {
+            if (map && tileLayers[type]) {
+                // Remove current tile layer
+                map.eachLayer(layer => {
+                    if (layer instanceof L.TileLayer) {
+                        map.removeLayer(layer);
+                    }
+                });
+                
+                // Add new tile layer
+                tileLayers[type].addTo(map);
+                currentTiles = type;
+                
+                // Update active button
+                document.querySelectorAll('.map-type-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.getElementById(`${type}-btn`).classList.add('active');
+            }
+        }
+
+        // Filter restaurants based on criteria
+        function filterRestaurants(criteria) {
+            let filtered = [...restaurants];
+            
+            switch(criteria) {
+                case 'proximity':
+                    filtered.sort((a, b) => a.distance - b.distance);
+                    break;
+                case 'price':
+                    filtered = filtered.filter(r => r.budget <= 20)
+                                      .sort((a, b) => a.distance - b.distance);
+                    break;
+                case 'top':
+                    filtered = filtered.filter(r => r.rating === 'A')
+                                      .sort((a, b) => a.distance - b.distance)
+                                      .slice(0, 5);
+                    break;
+            }
+            
+            return filtered;
+        }
+
+        // Show search results
+        function showSearchResults(filteredRestaurants = restaurants) {
+            const resultsContainer = document.getElementById('results-container');
+            const restaurantsList = document.getElementById('restaurants-list');
+            
+            // Clear previous results
+            restaurantsList.innerHTML = '';
+            
+            // Populate with new results
+            filteredRestaurants.forEach(restaurant => {
+                const restaurantCard = document.createElement('div');
+                restaurantCard.className = 'restaurant-card';
+                restaurantCard.innerHTML = `
+                    <img src="${restaurant.image}" alt="${restaurant.name}" class="restaurant-image">
+                    <div class="restaurant-info">
+                        <h3 class="restaurant-name">${restaurant.name}</h3>
+                        <div class="restaurant-details">
+                            <div>Classement: ${restaurant.rating} • ${restaurant.price} (${restaurant.budget}€)</div>
+                            <div>Distance: ${restaurant.distance.toFixed(1)} km • ${restaurant.commune}</div>
+                        </div>
+                        <div class="restaurant-actions">
+                            <button class="action-btn view-menu" onclick="viewRestaurantDetails(${restaurant.id})">
+                                <i class="fas fa-utensils"></i> Voir menu
+                            </button>
+                            <button class="action-btn view-map" onclick="viewOnMap(${restaurant.id})">
+                                <i class="fas fa-map-marker-alt"></i> Voir sur carte
+                            </button>
+                        </div>
+                    </div>
+                `;
+                restaurantsList.appendChild(restaurantCard);
+            });
+            
+            // Show results container
+            resultsContainer.style.display = 'block';
+        }
+
+        // View restaurant details
+        function viewRestaurantDetails(restaurantId) {
+            if (!isLoggedIn) {
+                // Redirect to login page if not authenticated
+                window.location.href = './pages/login.html';
+                return;
+            }
+            
+            // Here you would normally fetch detailed restaurant info
+            const restaurant = restaurants.find(r => r.id === restaurantId);
+            alert(`Détails du restaurant: ${restaurant.name}\nRedirection vers la page de détails...`);
+            // In a real app, you would navigate to a details page or show a modal
+        }
+
+        // View restaurant on map
+        function viewOnMap(restaurantId) {
+            // Hide results and show map
+            document.getElementById('results-container').style.display = 'none';
+            
+            // Find the restaurant and center map on it
+            const restaurant = restaurants.find(r => r.id === restaurantId);
+            if (restaurant && map) {
+                map.setView([restaurant.lat, restaurant.lng], 16);
+            }
+        }
+
+        // Advanced search
+        function performAdvancedSearch() {
+            const name = document.getElementById('restaurant-name').value.toLowerCase();
+            const budget = parseInt(document.getElementById('budget').value);
+            const people = parseInt(document.getElementById('people').value);
+            const commune = document.getElementById('commune').value.toLowerCase();
+            const rating = document.getElementById('rating').value;
+            
+            // Filter based on criteria
+            let filtered = restaurants.filter(restaurant => {
+                return (
+                    (name === '' || restaurant.name.toLowerCase().includes(name)) &&
+                    restaurant.budget <= budget &&
+                    (commune === '' || restaurant.commune.toLowerCase().includes(commune)) &&
+                    restaurant.rating <= rating
+                );
+            });
+            
+            // Show results
+            showSearchResults(filtered);
+            
+            // Close the panel
+            document.getElementById('search-panel').classList.remove('open');
+        }
+
+        // Event listeners
+        document.getElementById('retry-location').addEventListener('click', reloadLocation);
+        document.getElementById('use-default-location').addEventListener('click', useDefaultLocation);
+        document.getElementById('reload-location').addEventListener('click', reloadLocation);
+
+        // Map type buttons
+        document.getElementById('standard-btn').addEventListener('click', function() {
+            setMapType('standard');
+        });
+
+        document.getElementById('satellite-btn').addEventListener('click', function() {
+            setMapType('satellite');
+        });
+
+        // Search button - toggle advanced search panel
+        document.getElementById('search-button').addEventListener('click', function() {
+            document.getElementById('search-panel').classList.toggle('open');
+        });
+
+        // Panel handle
+        document.getElementById('panel-handle').addEventListener('click', function() {
+            document.getElementById('search-panel').classList.toggle('open');
+        });
+
+        // Advanced search button
+        document.getElementById('advanced-search-btn').addEventListener('click', performAdvancedSearch);
+
+        // Back to map button
+        document.getElementById('back-to-map').addEventListener('click', function() {
+            document.getElementById('results-container').style.display = 'none';
+        });
+
+        // Budget slider
+        const budgetSlider = document.getElementById('budget');
+        const budgetValue = document.getElementById('budget-value');
+        
+        budgetSlider.addEventListener('input', function() {
+            budgetValue.textContent = this.value + ' €';
+        });
+
+        // Filter buttons
+        document.querySelectorAll('.quickBtn').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.quickBtn').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filterType = this.getAttribute('data-filter');
+                const filteredRestaurants = filterRestaurants(filterType);
+                showSearchResults(filteredRestaurants);
+            });
+        });
+
+        // Bottom navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const view = this.getAttribute('data-view');
+                
+                if (view === 'map') {
+                    document.getElementById('results-container').style.display = 'none';
+                    document.getElementById('search-panel').classList.remove('open');
+                } else if (view === 'restaurants') {
+                    showSearchResults();
+                } else if (!isLoggedIn && (view === 'favorites' || view === 'profile')) {
+                    window.location.href = './pages/login.html';
+                    return;
+                }
+                
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Initialize the app
+        window.onload = function() {
+            getUserLocation();
+        };
+    </script>
+</body>
+</html>
