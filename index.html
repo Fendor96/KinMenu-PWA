@@ -603,7 +603,7 @@
         <div class="location-error" id="location-error">
             <p id="error-message">Impossible d'accéder à votre position. Veuillez vérifier les paramètres de localisation de votre appareil.</p>
             <button id="retry-location">Réessayer</button>
-            <button id="use-default-location">Utiliser Paris</button>
+            <button id="use-default-location">Utiliser Gombe (Kinshasa)</button>
         </div>
 
         <!-- Advanced Search Panel -->
@@ -662,19 +662,19 @@
     <section id="navigation-bottom">
         <div class="nav-btn active" data-view="map">
             <i class="fas fa-map-marked-alt"></i>
-            <span>Carte</span>
+            <a href="index.html"><span>Carte</span></a>
         </div>
         <div class="nav-btn" data-view="restaurants">
             <i class="fas fa-utensils"></i>
-            <span>Restaurants</span>
+        <a href="./pages/discover.html"><span>Restaurants</span></a>
         </div>
         <div class="nav-btn" data-view="favorites">
             <i class="fas fa-heart"></i>
-            <span>Favoris</span>
+        <a href="./pages/favoris.html"><span>Favoris</span></a>
         </div>
         <div class="nav-btn" data-view="profile">
             <i class="fas fa-user"></i>
-            <span>Profil</span>
+        <a href="./pages/profil.html"><span>Profil</span></a>
         </div>
     </section>
 
@@ -893,11 +893,11 @@
         }
 
         // Use a default location (Paris)
-        function useDefaultLocation() {
-            userLocation = { latitude: 48.8566, longitude: 2.3522 };
-            initMap(userLocation.latitude, userLocation.longitude);
-            document.getElementById('location-error').style.display = 'none';
-        }
+    function useDefaultLocation() {
+        userLocation = { latitude: -4.325, longitude: 15.322 };
+        initMap(userLocation.latitude, userLocation.longitude);
+        document.getElementById('location-error').style.display = 'none';
+    }
 
         // Reload location
         function reloadLocation() {
